@@ -415,6 +415,20 @@ canvas#cv{max-width:100%;max-height:100%;aspect-ratio:1408/768;border-radius:10p
 
 <div id="modalRoot"></div>
 <div id="rotate" role="alert"><div class="phone" aria-hidden="true"></div><p>Turn your phone sideways to play</p></div>
+<div class="modal-bg" id="installModal" hidden style="z-index:180">
+  <div class="panel modal" style="width:min(460px,100%)">
+    <div class="modal-body" style="justify-items:center;text-align:center">
+      <img src="icons/icon-192.png" alt="" width="84" height="84" style="border-radius:18px;box-shadow:0 0 0 2px var(--gold)">
+      <h2 class="gold" style="font-size:1.5rem">Download Skyfall Arcana?</h2>
+      <p class="note" style="margin:0" id="installWhy">Install it as an app: full screen, works offline, and updates itself.</p>
+      <div id="installSteps" class="info" hidden style="text-align:left"></div>
+      <div class="row" style="justify-content:center">
+        <button class="wood" id="installYes">Download</button>
+        <button class="wood sm" id="installNo">Play in browser</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div id="updBar" hidden><span>A new version of Skyfall Arcana is ready.</span><button class="wood sm" id="updNow">Update now</button></div>
 <div class="toast" id="toast" hidden></div>
 
@@ -1320,6 +1334,37 @@ async function goFull(){
 }
 $$(".fsBtn").forEach(b=>b.onclick=goFull);
 
+/* ================= INSTALL PROMPT ================= */
+let deferredInstall=null;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e});
+addEventListener("appinstalled",()=>{$("#installModal").hidden=true;deferredInstall=null;toast("Skyfall Arcana installed! Open it from your home screen or desktop.")});
+function isInstalled(){return matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches||navigator.standalone===true}
+function manualSteps(){
+  const ua=navigator.userAgent, ios=/iPhone|iPad|iPod/.test(ua)||(ua.includes("Mac")&&"ontouchend" in document);
+  if(ios) return /CriOS|FxiOS|EdgiOS/.test(ua)
+    ? "<p><b>On iPhone, installing needs Safari.</b> Open this link in Safari, tap <b>Share</b> (the square with an arrow), then <b>Add to Home Screen</b>.</p>"
+    : "<p>Tap <b>Share</b> (the square with an arrow) at the bottom of Safari, scroll down, then tap <b>Add to Home Screen</b> and <b>Add</b>.</p>";
+  if(/Android/.test(ua)) return "<p>Tap the <b>⋮</b> menu at the top right of Chrome, then <b>Install app</b> or <b>Add to Home screen</b>.</p>";
+  if(/Firefox/.test(ua)) return "<p>Firefox can't install apps. Open this link in <b>Chrome</b> or <b>Edge</b> and click the install icon in the address bar.</p>";
+  return "<p>Click the <b>install icon</b> at the right end of the address bar (a screen with a down arrow), or open the browser menu and choose <b>Install Skyfall Arcana</b>.</p>";
+}
+function offerInstall(){
+  if(!window.SKYFALL_PWA||isInstalled()) return;
+  try{ if(sessionStorage.getItem("sa_install_no")) return }catch(e){}
+  const m=$("#installModal"); m.hidden=false;
+  $("#installNo").onclick=()=>{m.hidden=true;try{sessionStorage.setItem("sa_install_no","1")}catch(e){}};
+  $("#installYes").onclick=async()=>{
+    if(!deferredInstall){ await new Promise(r=>setTimeout(r,1200)) }
+    if(deferredInstall){ deferredInstall.prompt(); const c=await deferredInstall.userChoice; deferredInstall=null; if(c.outcome==="accepted") m.hidden=true; return }
+    const st=$("#installSteps"); st.innerHTML=manualSteps(); st.hidden=false; $("#installYes").hidden=true; $("#installNo").textContent="Got it";
+  };
+}
+function initInstallButton(){ if(!window.SKYFALL_PWA||isInstalled()) return;
+  const b=document.createElement("button"); b.className="wood sm"; b.type="button"; b.textContent="Download app"; b.onclick=()=>{try{sessionStorage.removeItem("sa_install_no")}catch(e){} offerInstall()};
+  const row=document.querySelector(".bottom-row"); row&&row.insertBefore(b,row.querySelector(".fsBtn"));
+  const t=document.querySelector(".auth-form .tabs"); if(t){const b2=b.cloneNode(true);b2.onclick=b.onclick;t.appendChild(b2)}
+}
+
 /* ================= APP UPDATES ================= */
 const APP_VERSION="__VERSION__";
 let swReg=null, inMatch=()=>M&&!M.over;
@@ -1347,7 +1392,7 @@ function initPWA(){
 
 /* ================= BOOT ================= */
 function boot(){
-  load(); initAuth(); initMenu(); initPWA();
+  load(); initAuth(); initMenu(); initPWA(); initInstallButton(); setTimeout(offerInstall,600);
   const bg=`linear-gradient(rgba(10,18,28,.25),rgba(10,18,28,.45)), url(${IMG_SRC.terrain}) center 35%/min(1400px,140%) no-repeat, url(${IMG_SRC.sky}) center/cover`;
   $("#menu").style.background=bg; $("#auth").style.background=bg;
   let n=0; for(const k of ["sky","terrain","male","female"]){const im=new Image();im.onload=()=>{if(++n===4)ready()};im.src=IMG_SRC[k];IMG[k]=im}
