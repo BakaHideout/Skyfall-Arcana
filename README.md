@@ -2,7 +2,7 @@
 
 Turn-based wizard artillery battles on a destructible floating island. Inspired by Arcanists and Worms Armageddon.
 
-**Play / install:** https://bakahideout.github.io/Skyfall-Arcana/
+**Play / install:** https://skyfallarcana.github.io/ (moved)
 
 ## Install it
 
