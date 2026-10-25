@@ -175,7 +175,36 @@ label{display:grid;gap:4px;font-family:var(--ui);font-size:.95rem;letter-spacing
 .wind-bar{width:90px;height:10px;background:#0c1218;border-radius:5px;position:relative;box-shadow:inset 0 0 0 1px var(--slate-line)}
 .wind-bar i{position:absolute;top:0;bottom:0;background:var(--sky);border-radius:5px}
 .stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
-canvas#cv{max-width:100%;max-height:100%;aspect-ratio:1408/768;border-radius:10px;box-shadow:0 0 0 3px #2a323b,0 0 0 4px var(--stone-lo);touch-action:none;background:#7cb6dd}
+canvas#cv{position:absolute;inset:0;width:100%;height:100%;border-radius:10px;box-shadow:0 0 0 3px #2a323b,0 0 0 4px var(--stone-lo);touch-action:none;background:#7cb6dd;display:block}
+.stage{touch-action:none;-webkit-user-select:none;user-select:none}
+.zoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:8px;z-index:3}
+.zoom .wood{width:40px;height:40px;padding:0;font-size:1.4rem}
+.pad{position:absolute;bottom:12px;display:none;gap:14px;z-index:3;align-items:flex-end}
+.pad-l{left:12px}.pad-r{right:12px}
+.pbtn{width:78px;height:78px;border-radius:50%;border:3px solid rgba(246,234,210,.85);background:rgba(28,36,46,.55);color:var(--cream);display:grid;place-items:center;align-content:center;gap:0;padding:0;
+  box-shadow:0 4px 12px rgba(0,0,0,.45);touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.pbtn svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.pbtn span{font-family:var(--ui);font-weight:700;font-size:.7rem;letter-spacing:.06em;margin-top:-2px}
+.pbtn.small{width:62px;height:62px}.pbtn.small svg{width:26px;height:26px}
+.pbtn.on{background:rgba(242,207,124,.55);border-color:var(--gold)}
+.keyhint{text-align:center;font-family:var(--ui);color:var(--muted);font-size:.9rem;letter-spacing:.03em}
+@media (pointer:coarse){
+  .keyhint{display:none}
+  .pad{display:flex}
+  #game{padding:0!important;gap:0}
+  #game .stage{position:fixed;inset:0;z-index:0}
+  canvas#cv{border-radius:0;box-shadow:none}
+  #game .hud-top{position:fixed;z-index:4;top:calc(4px + env(safe-area-inset-top,0px));left:max(6px,env(safe-area-inset-left,0px));right:max(6px,env(safe-area-inset-right,0px));pointer-events:none}
+  #game .hud-top>*{pointer-events:auto}
+  #game .hud-box.panel{background:rgba(28,36,46,.7)}
+  #game .bar-row{position:fixed;z-index:4;left:50%;transform:translateX(-50%);bottom:calc(8px + env(safe-area-inset-bottom,0px));max-width:calc(100vw - 2*(12px + 78px + 62px + 30px))}
+  #game .spellbar{flex-wrap:nowrap;overflow-x:auto;padding:4px;max-width:100%}
+  #game .spell-tip{display:none}
+  .zoom{top:auto;bottom:110px;right:max(12px,env(safe-area-inset-right,0px))}
+  .pad-l{left:max(12px,env(safe-area-inset-left,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  .pad-r{right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+}
+@media (pointer:coarse) and (max-height:430px){.pbtn{width:66px;height:66px}.pbtn.small{width:54px;height:54px}.zoom{bottom:92px}}
 .spellbar{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;align-items:center}
 .sb{position:relative;width:52px;height:52px;border-radius:9px;border:none;padding:0;display:grid;place-items:center;box-shadow:0 0 0 2px #0b1016,inset 0 0 0 2px rgba(255,255,255,.12)}
 .sb svg{width:30px;height:30px}
@@ -191,8 +220,8 @@ canvas#cv{max-width:100%;max-height:100%;aspect-ratio:1408/768;border-radius:10p
 .rchip i b{display:block;height:100%}
 .rchip.dead{opacity:.35;text-decoration:line-through}
 .rchip.turn{box-shadow:0 0 0 2px var(--gold)}
-.touch{display:none;gap:6px;flex-wrap:wrap}
-@media (pointer:coarse){.touch{display:flex}}
+
+
 .banner{position:absolute;left:50%;top:14%;transform:translateX(-50%);font-family:var(--display);font-size:clamp(1.4rem,4vw,2.6rem);color:var(--cream);text-shadow:0 3px 0 #000,0 0 16px rgba(0,0,0,.7);pointer-events:none;text-align:center;white-space:nowrap}
 .result{width:min(560px,100%)}
 .result .big{font-family:var(--display);font-size:2.4rem;text-align:center;margin:0}
@@ -307,12 +336,12 @@ canvas#cv{max-width:100%;max-height:100%;aspect-ratio:1408/768;border-radius:10p
       <form id="loginForm" class="auth-form" style="padding:0" hidden novalidate>
         <button class="gbtn" type="button" id="googleLogin"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.2l7.8 6.1C12.3 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.4 28.7c-.5-1.4-.8-2.9-.8-4.7s.3-3.3.8-4.7l-7.8-6.1C1 16.4 0 20.1 0 24s1 7.6 2.6 10.8l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.3 0-11.7-4.1-13.6-9.8l-7.8 6.1C6.6 42.6 14.6 48 24 48z"/></svg>Log in with Google</button>
         <div class="or">OR</div>
-        <label>Username or email<input id="liUser" autocomplete="username"></label>
+        <label>Email<input id="liUser" type="email" autocomplete="email" placeholder="The email you signed up with"></label>
         <label>Password<input id="liPass" type="password" autocomplete="current-password"></label>
         <div class="err" id="liErr"></div>
         <button class="wood" type="submit">Log in</button>
       </form>
-      <p class="note">Accounts are saved in this browser for now. Real Google sign-in and cross-device accounts need the game server, which is the next build step.</p>
+      <p class="note" id="authNote">Your account is saved online, so you can log in on your phone and your PC with the same email and password.</p>
     </div>
   </div>
 </section>
@@ -400,17 +429,22 @@ canvas#cv{max-width:100%;max-height:100%;aspect-ratio:1408/768;border-radius:10p
       <button class="wood sm" id="resignBtn">Resign</button>
     </div>
   </div>
-  <div class="stage"><canvas id="cv" width="1408" height="768"></canvas><div class="banner" id="banner" hidden></div></div>
-  <div class="spell-tip" id="spellTip"></div>
-  <div class="row" style="justify-content:center">
-    <div class="touch" id="touchPad">
-      <button class="wood sm" data-t="left">◀ Walk</button>
-      <button class="wood sm" data-t="jump">Jump</button>
-      <button class="wood sm" data-t="high">High jump</button>
-      <button class="wood sm" data-t="right">Walk ▶</button>
+  <div class="stage" id="stage"><canvas id="cv" width="1408" height="768"></canvas><div class="banner" id="banner" hidden></div>
+    <div class="zoom"><button class="wood sm" id="zoomIn" type="button" aria-label="Zoom in">+</button><button class="wood sm" id="zoomOut" type="button" aria-label="Zoom out">−</button></div>
+    <div class="pad pad-l" id="padL">
+      <button class="pbtn" data-t="left" aria-label="Walk left"><svg viewBox="0 0 24 24"><path d="M15 4L7 12l8 8" /></svg></button>
+      <button class="pbtn" data-t="right" aria-label="Walk right"><svg viewBox="0 0 24 24"><path d="M9 4l8 8-8 8" /></svg></button>
     </div>
+    <div class="pad pad-r" id="padR">
+      <button class="pbtn small" data-t="high" aria-label="High jump"><svg viewBox="0 0 24 24"><path d="M12 20V5M6 10l6-6 6 6M6 15l6-6 6 6" /></svg><span>HIGH</span></button>
+      <button class="pbtn" data-t="jump" aria-label="Jump"><svg viewBox="0 0 24 24"><path d="M5 18c3-9 9-11 14-8M14 6l5 4-4 5" /></svg><span>JUMP</span></button>
+    </div>
+  </div>
+  <div class="spell-tip" id="spellTip"></div>
+  <div class="row bar-row" style="justify-content:center">
     <div class="spellbar" id="spellbar"></div>
   </div>
+  <div class="keyhint" id="keyHint">A / D walk · W jump · Space high jump · 1–9 spells · Q skip · mouse wheel zoom</div>
 </section>
 
 <div id="modalRoot"></div>
@@ -432,6 +466,7 @@ canvas#cv{max-width:100%;max-height:100%;aspect-ratio:1408/768;border-radius:10p
 <div id="updBar" hidden><span>A new version of Skyfall Arcana is ready.</span><button class="wood sm" id="updNow">Update now</button></div>
 <div class="toast" id="toast" hidden></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 "use strict";
 const IMG_SRC={sky:"assets/sky.jpg",terrain:"assets/terrain.webp",male:"assets/male.webp",female:"assets/female.webp"};
@@ -514,7 +549,46 @@ const KEY="skyfall_arcana_v1";
 let DB={users:{},session:null,chat:[],feedback:[]};
 let memoryOnly=false;
 function load(){try{const t=localStorage.getItem(KEY);if(t) DB=Object.assign(DB,JSON.parse(t));}catch(e){memoryOnly=true}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){memoryOnly=true}}
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){memoryOnly=true}}
+function save(){const u=me(); if(u) u._ts=Date.now(); saveLocal(); if(sb&&u&&u.cloudId){clearTimeout(pushT);pushT=setTimeout(pushProfile,700)}}
+
+/* ================= ONLINE ACCOUNTS (Supabase) ================= */
+const CLOUD={url:"{{SB_URL}}",key:"{{SB_KEY}}",google:false};
+let sb=null, pushT=null, onlineBoard=null;
+function initCloud(){ try{ if(window.supabase&&!/\{\{/.test(CLOUD.url)) sb=window.supabase.createClient(CLOUD.url,CLOUD.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"skyfall-auth"}}) }catch(e){sb=null} }
+const DATA_KEYS=["level","xp","prestige","rating","orbs","wins","losses","kills","games","spellbook","owned","outfit","friends","clan","opts","quizDay"];
+function packData(u){const d={};for(const k of DATA_KEYS)d[k]=u[k];return d}
+async function pushProfile(){const u=me();if(!sb||!u||!u.cloudId)return;
+  const {error}=await sb.from("profiles").update({level:u.level,rating:u.rating,prestige:u.prestige,data:packData(u),updated_at:new Date(u._ts||Date.now()).toISOString()}).eq("id",u.cloudId);
+  if(error) console.warn("save failed",error.message)}
+async function usernameFree(name){const {data,error}=await sb.rpc("username_available",{name});if(error) throw error;return data===true}
+function authMsg(e){const m=(e&&e.message||"").toLowerCase();
+  if(m.includes("invalid login")) return "Wrong email or password. Try again.";
+  if(m.includes("already registered")||m.includes("already been registered")) return "An account already uses that email. Log in instead.";
+  if(m.includes("email not confirmed")) return "Confirm your email first: open the link we emailed you, then log in.";
+  if(m.includes("rate limit")||m.includes("security purposes")) return "Too many tries. Wait a minute and try again.";
+  if(m.includes("password")) return "Password needs at least 6 characters.";
+  if(m.includes("fetch")||m.includes("network")) return "Can't reach the game server. Check your internet and try again.";
+  return e&&e.message?e.message:"Something went wrong. Try again."}
+async function loadProfile(user,extra){
+  let {data:row,error}=await sb.from("profiles").select("*").eq("id",user.id).maybeSingle();
+  if(error) throw error;
+  const local=Object.values(DB.users).find(x=>x.cloudId===user.id);
+  if(!row){
+    const md=Object.assign({},user.user_metadata||{},extra||{});
+    if(!md.username||!md.gender) return "needsProfile";
+    const u=newUser({username:md.username,email:user.email,provider:"email",age:md.age,gender:md.gender}); Object.assign(u,md.local_data||{});
+    const r=await sb.from("profiles").insert({id:user.id,username:u.username,age:u.age,gender:u.gender,level:u.level,rating:u.rating,prestige:u.prestige,data:packData(u)}).select().single();
+    if(r.error){ if(r.error.code==="23505") return "nameTaken"; throw r.error } row=r.data;
+  }
+  const u=newUser({username:row.username,email:user.email,provider:(user.app_metadata&&user.app_metadata.provider)==="google"?"google":"email",age:row.age,gender:row.gender});
+  Object.assign(u,row.data||{}); u.cloudId=user.id; u._ts=Date.parse(row.updated_at)||0;
+  // progress made offline on this device and never uploaded wins
+  if(local&&local._ts>u._ts+2000){ Object.assign(u,packData(local)); u._ts=local._ts; }
+  for(const k of Object.keys(DB.users)) if(DB.users[k].cloudId) delete DB.users[k];
+  DB.users[u.username]=u; DB.session=u.username; save(); return u;
+}
+async function refreshOnlineBoard(){ if(!sb) return; const {data,error}=await sb.rpc("get_leaderboard",{lim:100}); if(!error&&data){onlineBoard=data; if(!$("#menu").hidden) renderBoard()} }
 function me(){return DB.session&&DB.users[DB.session]}
 async function hash(s){try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("skyfall:"+s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))|0;return "x"+h}}
 function newUser(o){
@@ -530,7 +604,10 @@ const NPCS=[["Emberwick",2420,44,2],["Thornveil",2210,50,1],["Mirelda",2050,38,0
  ["Calder",1320,18,0],["Wisp",1260,16,0],["Morrow",1210,14,0],["Juniper",1150,12,0],["Fenwick",1100,11,0],["Ottilie",1040,9,0],["Hobb",990,7,0],["Lark",930,5,0]]
  .map(([name,rating,level,prestige],i)=>({name,rating,level,prestige,gender:i%3===1?"female":"male",npc:true}));
 function leaderboard(){
-  const real=Object.values(DB.users).map(u=>({name:u.username,rating:u.rating,level:u.level,prestige:u.prestige,gender:u.outfit==="female"?"female":"male",me:u.username===DB.session}));
+  const mine=me();
+  let real=onlineBoard?onlineBoard.map(r=>({name:r.username,rating:r.rating,level:r.level,prestige:r.prestige,gender:r.outfit==="female"?"female":"male",me:mine&&r.username.toLowerCase()===mine.username.toLowerCase()}))
+    :Object.values(DB.users).map(u=>({name:u.username,rating:u.rating,level:u.level,prestige:u.prestige,gender:u.outfit==="female"?"female":"male",me:u.username===DB.session}));
+  if(mine){ const r=real.find(x=>x.me); if(r){r.rating=mine.rating;r.level=mine.level;r.prestige=mine.prestige} else real.push({name:mine.username,rating:mine.rating,level:mine.level,prestige:mine.prestige,gender:mine.outfit==="female"?"female":"male",me:true}) }
   return [...NPCS,...real].sort((a,b)=>b.rating-a.rating);
 }
 
@@ -575,8 +652,9 @@ function initAuth(){
   $("#authChar").src=IMG_SRC.male;
   $("#tabSignup").onclick=()=>authTab("signup"); $("#tabLogin").onclick=()=>authTab("login");
   $("#gMale").onclick=()=>setGender("male"); $("#gFemale").onclick=()=>setGender("female");
-  $("#googleSignup").onclick=()=>{googleMode="signup";$("#gModal").hidden=false;$("#gEmail").focus()};
-  $("#googleLogin").onclick=()=>{googleMode="login";$("#gModal").hidden=false;$("#gEmail").focus()};
+  const google=async()=>{ if(!sb||!CLOUD.google){ toast("Google sign-in is coming soon. Use your email for now."); return }
+    const {error}=await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.href.split("#")[0].split("?")[0]}}); if(error) toast(authMsg(error)) };
+  $("#googleSignup").onclick=google; $("#googleLogin").onclick=google;
   $("#gClose").onclick=()=>$("#gModal").hidden=true;
   $("#gForm").onsubmit=e=>{e.preventDefault();const em=$("#gEmail").value.trim();
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){$("#gErr").textContent="Enter a valid Google email address.";return}
@@ -591,6 +669,7 @@ function initAuth(){
     $("#suUser").focus();
   };
   $("#signupForm").onsubmit=async e=>{e.preventDefault();const err=$("#suErr");err.textContent="";
+    if(sb) return cloudSignup(err);
     const user=$("#suUser").value.trim(), age=parseInt($("#suAge").value,10);
     const email=googlePending||$("#suEmail").value.trim();
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return err.textContent="Enter a valid email address.";
@@ -606,6 +685,7 @@ function initAuth(){
     loginAs(user); toast("Welcome to Skyfall Arcana, "+user+"!");
   };
   $("#loginForm").onsubmit=async e=>{e.preventDefault();const err=$("#liErr");err.textContent="";
+    if(sb) return cloudLogin(err);
     const u=findUser($("#liUser").value); if(!u) return err.textContent="No account with that username or email.";
     if(u.provider==="google") return err.textContent="This account uses Google. Use “Log in with Google”.";
     if(await hash($("#liPass").value)!==u.pw) return err.textContent="Wrong password. Try again.";
@@ -613,6 +693,54 @@ function initAuth(){
   };
 }
 function loginAs(name){DB.session=name;save();enterMenu()}
+function busy(form,on){form.querySelectorAll("button,input").forEach(x=>x.disabled=on)}
+async function cloudSignup(err){
+  const form=$("#signupForm");
+  const user=$("#suUser").value.trim(), age=parseInt($("#suAge").value,10), email=$("#suEmail").value.trim(), pw=$("#suPass").value;
+  const finishing=!!googlePending;
+  if(!finishing&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return err.textContent="Enter a valid email address.";
+  if(!/^[A-Za-z0-9_]{3,16}$/.test(user)) return err.textContent="Username must be 3–16 letters, numbers or underscores.";
+  if(NPCS.some(n=>n.name.toLowerCase()===user.toLowerCase())) return err.textContent="That username is taken. Try another.";
+  if(!(age>=5&&age<=120)) return err.textContent="Enter your age as a number.";
+  if(!finishing){ if(pw.length<6) return err.textContent="Password needs at least 6 characters."; if(pw!==$("#suPass2").value) return err.textContent="Passwords don't match."; }
+  if(!suGender) return err.textContent="Choose Male or Female to get your character.";
+  busy(form,true);
+  try{
+    if(!(await usernameFree(user))) return err.textContent="That username is taken. Try another.";
+    if(finishing){ const {data:{user:au}}=await sb.auth.getUser(); const r=await loadProfile(au,{username:user,age,gender:suGender}); if(r==="nameTaken") return err.textContent="That username was just taken. Try another.";
+      googlePending=null; $("#emailWrap").hidden=false; $("#pwWrap").hidden=false; $("#googleNote").hidden=true; enterMenu(); return }
+    const {data,error}=await sb.auth.signUp({email,password:pw,options:{data:{username:user,age,gender:suGender},emailRedirectTo:location.href.split("#")[0].split("?")[0]}});
+    if(error) return err.textContent=authMsg(error);
+    if(!data.session){ authTab("login"); $("#liUser").value=email; $("#liErr").textContent=""; toast("Almost done! Open the link we emailed to "+email+", then log in."); return }
+    const r=await loadProfile(data.user); if(r==="nameTaken"){ await sb.auth.signOut(); return err.textContent="That username was just taken. Try another." }
+    toast("Welcome to Skyfall Arcana, "+user+"!"); enterMenu();
+  }catch(e){ err.textContent=authMsg(e) } finally{ busy(form,false) }
+}
+async function cloudLogin(err){
+  const form=$("#loginForm"); let email=$("#liUser").value.trim(); const pw=$("#liPass").value;
+  if(!email.includes("@")){ const lu=findUser(email); if(lu&&lu.email) email=lu.email; else return err.textContent="Log in with the email address you signed up with." }
+  busy(form,true);
+  try{
+    let {data,error}=await sb.auth.signInWithPassword({email,password:pw});
+    if(error){
+      // An account made on this device before accounts went online: move it online now
+      const lu=Object.values(DB.users).find(x=>!x.cloudId&&(x.email||"").toLowerCase()===email.toLowerCase());
+      if(lu&&lu.pw&&(await hash(pw))===lu.pw&&/invalid login/i.test(error.message)){
+        if(!(await usernameFree(lu.username))) return err.textContent="Your old username is taken online. Create a new account instead.";
+        const r=await sb.auth.signUp({email,password:pw,options:{data:{username:lu.username,age:lu.age,gender:lu.gender,local_data:packData(lu)},emailRedirectTo:location.href.split("#")[0].split("?")[0]}});
+        if(r.error) return err.textContent=authMsg(r.error);
+        if(!r.data.session) return toast("Open the link we emailed to "+email+", then log in again to finish moving "+lu.username+" online.");
+        delete DB.users[lu.username]; await loadProfile(r.data.user); toast(lu.username+" is now an online account."); enterMenu(); return;
+      }
+      return err.textContent=authMsg(error);
+    }
+    const r=await loadProfile(data.user);
+    if(r==="needsProfile") return askProfile(data.user);
+    enterMenu();
+  }catch(e){ err.textContent=authMsg(e) } finally{ busy(form,false) }
+}
+function askProfile(user){ googlePending=user.email||"google"; authTab("signup"); $("#emailWrap").hidden=true; $("#pwWrap").hidden=true;
+  const n=$("#googleNote"); n.hidden=false; n.innerHTML=`Signed in as <b>${esc(user.email||"")}</b>. Pick a username, age and gender to finish.`; show("#auth"); $("#suUser").focus() }
 
 /* ================= MENU ================= */
 const CHAT_LINES=["GGs!","New spellbook is cool.","Anyone up for 2v2?","Meteor + Gust combo is nasty","How do I unlock Thunder?","Level 10 finally","That quake bomb bounced right back at me lol","Store is open!","Who wants to join my clan?","Prestige blue aura looks clean","rematch?","Black Hole into the sea every time"];
@@ -654,11 +782,11 @@ function renderBoard(full){
 function initMenu(){
   $$("[data-open]").forEach(b=>b.onclick=()=>{sfx("click");PANELS[b.dataset.open]()});
   $$("[data-start]").forEach(b=>b.onclick=()=>{sfx("click");const v=b.dataset.start;startMatch(v==="ranked"?{size:1,ranked:true}:{size:+v,ranked:false})});
-  $("#lbRefresh").onclick=()=>{NPCS.forEach(n=>{n.rating=clamp(n.rating+Math.round(rand(-12,12)),800,3200)});renderBoard();toast("Leaderboard refreshed")};
+  $("#lbRefresh").onclick=async()=>{await refreshOnlineBoard();renderBoard();toast("Leaderboard refreshed")};
   $("#chatForm").onsubmit=e=>{e.preventDefault();const v=$("#chatIn").value.trim();if(!v)return;chatPush(me().username,v);$("#chatIn").value="";save()};
   let armed=false;
   $("#logoutBtn").onclick=()=>{if(!armed){armed=true;$("#logoutBtn").textContent="Tap again to log out";setTimeout(()=>{armed=false;$("#logoutBtn").textContent="Logout"},2500);return}
-    DB.session=null;save();clearInterval(chatTimer);show("#auth");$("#logoutBtn").textContent="Logout";armed=false};
+    if(sb) sb.auth.signOut().catch(()=>{}); DB.session=null;saveLocal();clearInterval(chatTimer);show("#auth");$("#logoutBtn").textContent="Logout";armed=false};
 }
 
 /* ================= PANELS ================= */
@@ -749,9 +877,10 @@ const PANELS={
   const b=openModal("Friends list",`<form class="row" id="fForm"><input id="fName" placeholder="Add a friend by username" style="flex:1;min-width:0" aria-label="Friend username"><button class="wood sm" type="submit">Add</button></form>
    <div class="err" id="fErr"></div>
    <div class="statgrid">${u.friends.length?u.friends.map(f=>{const online=NPCS.some(n=>n.name===f)?Math.random()<.6:false;return `<span>${esc(f)}</span><span style="color:${online?"var(--good)":"var(--muted)"}">${online?"Online":"Offline"} <button class="wood sm" data-rm="${esc(f)}">Remove</button></span>`}).join(""):'<span class="muted">No friends yet. Try adding Emberwick or GolemFan.</span><span></span>'}</div>`,{w:520});
-  b.querySelector("#fForm").onsubmit=e=>{e.preventDefault();const n=b.querySelector("#fName").value.trim();
-    const target=NPCS.find(x=>x.name.toLowerCase()===n.toLowerCase())||findUser(n);
-    const name=target?(target.name||target.username):null;
+  b.querySelector("#fForm").onsubmit=async e=>{e.preventDefault();const n=b.querySelector("#fName").value.trim();
+    let target=NPCS.find(x=>x.name.toLowerCase()===n.toLowerCase())||findUser(n);
+    let name=target?(target.name||target.username):null;
+    if(!name&&sb&&/^[A-Za-z0-9_]{3,16}$/.test(n)){ try{ if(!(await usernameFree(n))) name=n }catch(_){} }
     if(!name) return b.querySelector("#fErr").textContent="No player with that username.";
     if(name===u.username) return b.querySelector("#fErr").textContent="You can't add yourself.";
     if(u.friends.includes(name)) return b.querySelector("#fErr").textContent="Already on your list.";
@@ -894,7 +1023,7 @@ function startMatch(cfg){
      water:H-6,wind:0,phase:"start",active:null,timer:u.opts.turn,selSpell:0,charge:0,charging:false,
      armaAt:40,warned:false,ff:false,over:false,botPlan:null,startedAt:Date.now(),dmgNums:u.opts.dmgNums};
   for(const un of units) unstick(un);
-  show("#game"); $("#ffBtn").classList.remove("on");
+  show("#game"); $("#ffBtn").classList.remove("on"); fitCanvas(); setZoom(matchMedia("(pointer:coarse)").matches?1.8:1); CAM.x=W/2; CAM.y=H/2;
   banner(cfg.ranked?"Ranked duel":`${cfg.size}v${cfg.size}`,1600);
   setTimeout(()=>nextTurn(true),900);
   if(!loopOn){loopOn=true;requestAnimationFrame(loop)}
@@ -1188,8 +1317,26 @@ function tick(){
 }
 
 /* ----- drawing ----- */
+const CAM={x:W/2,y:H/2,zoom:1,scale:1,ox:0,oy:0,dpr:1,manual:0};
+function fitCanvas(){const st=$("#stage");if(!st)return;const r=st.getBoundingClientRect();const dpr=Math.min(2,devicePixelRatio||1);
+  const w=Math.max(2,Math.round(r.width*dpr)),h=Math.max(2,Math.round(r.height*dpr));if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}CAM.dpr=dpr}
+addEventListener("resize",()=>{if(M)fitCanvas()});
+function updateCamera(){
+  const cw=cv.width,ch=cv.height,s0=Math.min(cw/W,ch/H);CAM.scale=s0*CAM.zoom;
+  let fx=W/2,fy=H/2;
+  const p=M.proj[0];
+  if(p){fx=p.x;fy=p.y}else if(M.active&&M.active.alive){fx=M.active.x;fy=M.active.y-30}
+  if(CAM.manual>0){CAM.manual--}else{CAM.x+=(fx-CAM.x)*.08;CAM.y+=(fy-CAM.y)*.08}
+  const vw=cw/CAM.scale,vh=ch/CAM.scale;
+  CAM.x=vw>=W?W/2:clamp(CAM.x,vw/2,W-vw/2); CAM.y=vh>=H?H/2:clamp(CAM.y,vh/2,H-vh/2);
+  CAM.ox=cw/2-CAM.x*CAM.scale; CAM.oy=ch/2-CAM.y*CAM.scale;
+}
+function setZoom(z){CAM.zoom=clamp(z,1,3)}
 function draw(){
-  cx.clearRect(0,0,W,H);
+  fitCanvas(); updateCamera();
+  cx.setTransform(1,0,0,1,0,0);
+  const g=cx.createLinearGradient(0,0,0,cv.height);g.addColorStop(0,"#9ccbe9");g.addColorStop(.55,"#5f97c0");g.addColorStop(1,"#2f5f86");cx.fillStyle=g;cx.fillRect(0,0,cv.width,cv.height);
+  cx.setTransform(CAM.scale,0,0,CAM.scale,CAM.ox,CAM.oy);
   cx.drawImage(IMG.sky,0,0,W,H);
   // water band
   if(M.water<H-6){cx.fillStyle="rgba(40,110,170,.55)";cx.fillRect(0,M.water,W,H-M.water);cx.fillStyle="rgba(200,240,255,.6)";cx.fillRect(0,M.water,W,3)}
@@ -1265,7 +1412,7 @@ function renderSpellbar(){
 function selectSpell(i){const me_=M.units.find(u=>u.isPlayer);if(i<0||i>=me_.spells.length)return;M.selSpell=i;M.charging=false;M.charge=0;sfx("click");renderSpellbar()}
 
 /* ----- input ----- */
-function toWorld(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
+function toWorld(e){const r=cv.getBoundingClientRect();const px=(e.clientX-r.left)*cv.width/r.width,py=(e.clientY-r.top)*cv.height/r.height;return{x:(px-CAM.ox)/CAM.scale,y:(py-CAM.oy)/CAM.scale}}
 function playerTurn(){return M&&M.phase==="turn"&&!M.cast&&M.active&&M.active.isPlayer&&M.active.alive}
 cv.addEventListener("pointermove",e=>{const p=toWorld(e);mouse.x=p.x;mouse.y=p.y});
 cv.addEventListener("pointerdown",e=>{const p=toWorld(e);mouse.x=p.x;mouse.y=p.y;cv.setPointerCapture(e.pointerId);if(!playerTurn())return;
@@ -1277,19 +1424,29 @@ cv.addEventListener("pointerdown",e=>{const p=toWorld(e);mouse.x=p.x;mouse.y=p.y
 cv.addEventListener("pointerup",e=>{if(!M||!M.charging)return;M.charging=false;if(!playerTurn())return;const u=M.active;castSpell(u,u.spells[M.selSpell],mouse.x,mouse.y,Math.max(.08,M.charge))});
 addEventListener("keydown",e=>{
   if($("#game").hidden||e.target.tagName==="INPUT") return;
-  const k=e.key.toLowerCase();
-  if(k==="a"||k==="arrowleft") keys.left=true;
-  if(k==="d"||k==="arrowright") keys.right=true;
-  if(playerTurn()&&!M.active.frozen){ if(k==="w"||k==="arrowup"){jump(M.active,false);e.preventDefault()} if(k===" "){jump(M.active,true);e.preventDefault()} }
+  const k=e.key.toLowerCase(), c=e.code;
+  const L=c==="KeyA"||k==="a"||k==="arrowleft", Rr=c==="KeyD"||k==="d"||k==="arrowright", J=c==="KeyW"||k==="w"||k==="arrowup", HJ=c==="Space"||k===" ";
+  if(L||Rr||J||HJ) e.preventDefault();
+  if(L) keys.left=true;
+  if(Rr) keys.right=true;
+  if((L||Rr||J||HJ)&&!e.repeat&&M&&!playerTurn()&&!M.over) toast(M.active&&M.active.isPlayer?"Wait for your spell to land":"Wait for your turn");
+  if(playerTurn()&&!M.active.frozen&&!e.repeat){ if(J) jump(M.active,false); if(HJ) jump(M.active,true) }
+  if(k==="+"||k==="=") setZoom(CAM.zoom+.25); if(k==="-") setZoom(CAM.zoom-.25);
   if(/^[0-9]$/.test(k)) selectSpell(k==="0"?9:+k-1);
   if(k==="q"&&playerTurn()) skipTurn();
 });
-addEventListener("keyup",e=>{const k=e.key.toLowerCase();if(k==="a"||k==="arrowleft")keys.left=false;if(k==="d"||k==="arrowright")keys.right=false});
-$$("#touchPad [data-t]").forEach(b=>{const t=b.dataset.t;
-  b.addEventListener("pointerdown",e=>{e.preventDefault();if(t==="left")keys.left=true;if(t==="right")keys.right=true;if(playerTurn()&&!M.active.frozen){if(t==="jump")jump(M.active,false);if(t==="high")jump(M.active,true)}});
-  for(const ev of ["pointerup","pointerleave","pointercancel"]) b.addEventListener(ev,()=>{if(t==="left")keys.left=false;if(t==="right")keys.right=false})});
+addEventListener("keyup",e=>{const k=e.key.toLowerCase(),c=e.code;if(c==="KeyA"||k==="a"||k==="arrowleft")keys.left=false;if(c==="KeyD"||k==="d"||k==="arrowright")keys.right=false});
+addEventListener("blur",()=>{keys.left=keys.right=false});
+$$(".pad [data-t]").forEach(b=>{const t=b.dataset.t;b.addEventListener("contextmenu",e=>e.preventDefault());
+  b.addEventListener("pointerdown",e=>{e.preventDefault();try{b.setPointerCapture(e.pointerId)}catch(_){} b.classList.add("on");
+    if(!playerTurn()){toast(M&&M.active&&M.active.isPlayer?"Wait for your spell to land":"Wait for your turn");return}
+    if(t==="left")keys.left=true;if(t==="right")keys.right=true;if(!M.active.frozen){if(t==="jump")jump(M.active,false);if(t==="high")jump(M.active,true)}else toast("You're frozen this turn")});
+  for(const ev of ["pointerup","pointercancel","lostpointercapture"]) b.addEventListener(ev,()=>{b.classList.remove("on");if(t==="left")keys.left=false;if(t==="right")keys.right=false})});
 function skipTurn(){if(!playerTurn())return;M.cast=true;M.fx.push({t:"wait",life:10,max:10,block:true});toast("Turn skipped")}
 $("#skipBtn").onclick=skipTurn;
+$("#zoomIn").onclick=()=>setZoom(CAM.zoom+.4);
+$("#zoomOut").onclick=()=>setZoom(CAM.zoom-.4);
+cv.addEventListener("wheel",e=>{e.preventDefault();setZoom(CAM.zoom*(e.deltaY<0?1.12:1/1.12))},{passive:false});
 $("#ffBtn").onclick=()=>{if(!M)return;M.ff=!M.ff;$("#ffBtn").classList.toggle("on",M.ff)};
 let resignArmed=false;
 $("#resignBtn").onclick=()=>{if(!M||M.over)return;if(!resignArmed){resignArmed=true;$("#resignBtn").textContent="Tap again";setTimeout(()=>{resignArmed=false;$("#resignBtn").textContent="Resign"},2500);return}
@@ -1397,7 +1554,18 @@ function boot(){
   $("#menu").style.background=bg; $("#auth").style.background=bg;
   let n=0; for(const k of ["sky","terrain","male","female"]){const im=new Image();im.onload=()=>{if(++n===4)ready()};im.src=IMG_SRC[k];IMG[k]=im}
 }
-function ready(){ if(me()) enterMenu(); else show("#auth") }
+async function ready(){
+  initCloud();
+  if(!sb){ if(me()) enterMenu(); else show("#auth"); return }
+  refreshOnlineBoard();
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    if(session){ const r=await loadProfile(session.user); if(r==="needsProfile") return askProfile(session.user); return enterMenu() }
+  }catch(e){ const u=me(); if(u&&u.cloudId){ toast("Playing offline. Progress uploads next time you're online."); return enterMenu() } }
+  const old=Object.values(DB.users).find(x=>!x.cloudId);
+  if(old){ authTab("login"); if(old.email) $("#liUser").value=old.email; $("#authNote").innerHTML=`Accounts are online now. Log in once with your email and password to move <b>${esc(old.username)}</b> online, so it works on every device.` }
+  DB.session=null; show("#auth");
+}
 boot();
 </script>
 
