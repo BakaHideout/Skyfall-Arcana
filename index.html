@@ -553,7 +553,7 @@ function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){m
 function save(){const u=me(); if(u) u._ts=Date.now(); saveLocal(); if(sb&&u&&u.cloudId){clearTimeout(pushT);pushT=setTimeout(pushProfile,700)}}
 
 /* ================= ONLINE ACCOUNTS (Supabase) ================= */
-const CLOUD={url:"{{SB_URL}}",key:"{{SB_KEY}}",google:false};
+const CLOUD={url:"https://hroooqbiywljchtyipnp.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhyb29vcWJpeXdsamNodHlpcG5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4ODgwNjcsImV4cCI6MjEwODQ2NDA2N30.OyNnR5eTht8kICGVu63rCKe3Sr-otZ4nGWVcbVATjow",google:false};
 let sb=null, pushT=null, onlineBoard=null;
 function initCloud(){ try{ if(window.supabase&&!/\{\{/.test(CLOUD.url)) sb=window.supabase.createClient(CLOUD.url,CLOUD.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"skyfall-auth"}}) }catch(e){sb=null} }
 const DATA_KEYS=["level","xp","prestige","rating","orbs","wins","losses","kills","games","spellbook","owned","outfit","friends","clan","opts","quizDay"];
